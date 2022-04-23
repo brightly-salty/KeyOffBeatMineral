@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk as ttk
 import tkinter.scrolledtext as st
 from tkinter import messagebox
+from functools import partial
 
 # should send all user events to the presenter
 # will receive updates to the view from the presenter
@@ -31,11 +32,13 @@ class View:
 
   pres_add_url = None
   pres_add_json = None
+  pres_leetify = None
 
-  def __init__(self, pres_import_url, pres_import_json, pres_back_import_url, pres_add_url, pres_back_import_json, pres_add_json, pres_back_view, pres_back_edit, pres_save_changes, pres_delete):
+  def __init__(self, pres_import_url, pres_import_json, pres_back_import_url, pres_add_url, pres_back_import_json, pres_add_json, pres_back_view, pres_back_edit, pres_save_changes, pres_delete, pres_leetify):
     """Creates a Model object with the given presenter functions, initializes tk"""
     self.pres_add_url = pres_add_url
     self.pres_add_json = pres_add_json
+    self.pres_leetify = pres_leetify
     self.style = ttk.Style()
     self.style.configure("TButton", foreground="white", background="grey", padding=0, highlightbackground="grey")
     self.root = tk.Tk()
@@ -133,6 +136,21 @@ class View:
     save_changes_button.grid(pady=10, row=0, column=0)
     delete_recipe_button = tk.Button(sv_dlt_button_frame, text='Delete Recipe', command=pres_delete, highlightbackground="grey")
     delete_recipe_button.grid(pady=10, padx=(20, 0), row=0, column=1)
+    self.root.bind('1', partial(View.leet_1, self))
+
+  def leet_1(self, _):
+    self.root.unbind('1')
+    self.root.bind('3', partial(View.leet_2, self))
+
+  def leet_2(self, _):
+    self.root.bind('3', partial(View.leet_3, self))
+
+  def leet_3(self, _):
+    self.root.unbind('3')
+    self.root.bind('7', partial(View.leet_4, self))
+
+  def leet_4(self, _):
+    self.pres_leetify()
     
   def clean_import_url(self):
     """Cleans the fields associated with the import url screen and minimizes the screen"""

@@ -7,6 +7,7 @@ from view import View
 from functools import partial
 import validators
 import pyperclip
+import random 
 
 class Presenter:
   view = None
@@ -21,7 +22,7 @@ class Presenter:
   
   def __init__(self, model_edit, model_delete, model_url, model_get, model_save, model_json, model_dump_json):
     """Creates a Presenter object with the given functions to access the model"""
-    self.view = View(partial(Presenter.import_url, self), partial(Presenter.import_json, self), partial(Presenter.back_import_url, self), partial(Presenter.add_url, self), partial(Presenter.back_import_json, self), partial(Presenter.add_json, self), partial(Presenter.back_view, self), partial(Presenter.back_edit, self), partial(Presenter.save_changes, self), partial(Presenter.delete, self))
+    self.view = View(partial(Presenter.import_url, self), partial(Presenter.import_json, self), partial(Presenter.back_import_url, self), partial(Presenter.add_url, self), partial(Presenter.back_import_json, self), partial(Presenter.add_json, self), partial(Presenter.back_view, self), partial(Presenter.back_edit, self), partial(Presenter.save_changes, self), partial(Presenter.delete, self), partial(Presenter.leetify, self))
     self.model_edit = model_edit
     self.model_delete = model_delete
     self.model_url = model_url
@@ -163,3 +164,32 @@ class Presenter:
   def start_loop(self):
     """Starts the main loop"""
     self.view.start_loop()
+
+  def leetify(self):
+    i = 0
+    for recipe in self.model_get():
+      name = translate(recipe['name'])
+      ingredients = [translate(ingredient) for ingredient in recipe['ingredients']]
+      directions = [translate(direction) for direction in recipe['directions']]
+      self.model_edit(i, name, ingredients, directions)
+      i += 1
+    self.model_save()
+    self.reload_recipes()
+
+def translate(message):
+  charMapping = {
+     'a': ['4', '@', '/-\\'], 'c': ['('], 'd': ['|)'], 'e': ['3'],
+     'f': ['ph'], 'h': [']-[', '|-|'], 'i': ['1', '!', '|'], 'k': [']<'],
+     'o': ['0'], 's': ['$', '5'], 't': ['7', '+'], 'u': ['|_|'],
+    'v': ['\\/']}
+  leetspeak = ''
+  for char in message:  # Check each character:
+    # There is a 70% chance we change the character to leetspeak.
+    if char.lower() in charMapping and random.random() <= 0.60:
+      possibleLeetReplacements = charMapping[char.lower()]
+      leetReplacement = random.choice(possibleLeetReplacements)
+      leetspeak = leetspeak + leetReplacement
+    else:
+      # Don't translate this character:
+      leetspeak = leetspeak + char
+  return leetspeak
